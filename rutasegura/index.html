@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b3a6e">
+<title>RutaSegura</title>
+<style>
+  :root {
+    --navy: #0b3a6e;
+    --blue: #1565c0;
+    --blue-soft: #e8f1fc;
+    --teal: #0e9f7e;
+    --teal-soft: #e3f6f0;
+    --bg: #f3f7fb;
+    --card: #ffffff;
+    --text: #13263d;
+    --muted: #5d7089;
+    --line: #dbe5ef;
+    --safe: #16a34a;
+    --safe-bg: #dcfce7;
+    --mid: #d29a00;
+    --mid-bg: #fef6d8;
+    --low: #dc4a3d;
+    --low-bg: #fde6e3;
+    --radius: 16px;
+    --shadow: 0 4px 18px rgba(11, 58, 110, .08);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #dfe8f2;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  /* App shell: phone-width column, centered on desktop */
+  .app {
+    max-width: 440px; margin: 0 auto; min-height: 100%;
+    background: var(--bg); position: relative;
+    display: flex; flex-direction: column;
+    box-shadow: 0 0 40px rgba(0,0,0,.08);
+  }
+  header.top {
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    color: #fff; padding: 14px 16px 16px;
+    position: sticky; top: 0; z-index: 20;
+  }
+  .top-row { display: flex; align-items: center; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
+  .brand svg { width: 26px; height: 26px; }
+  .back { background: rgba(255,255,255,.15); border: 0; color: #fff; width: 34px; height: 34px; border-radius: 10px; display: none; align-items: center; justify-content: center; }
+  .back.show { display: flex; }
+  .top-sub { font-size: 13px; opacity: .85; margin-top: 4px; }
+  .pill-live { margin-left: auto; background: rgba(255,255,255,.18); padding: 4px 10px; border-radius: 99px; font-size: 12px; display: none; align-items: center; gap: 6px; border: 0; color: #fff; }
+  .pill-live.show { display: flex; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #5ef0b8; animation: blink 1.4s infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+
+  main { flex: 1; padding: 16px 16px 96px; }
+  .screen { display: none; animation: fade .2s ease; }
+  .screen.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  h2 { font-size: 20px; margin: 4px 0 12px; }
+  h3 { font-size: 16px; margin: 20px 0 10px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+  .stack > * + * { margin-top: 12px; }
+
+  /* Search */
+  .search-card { margin-top: -4px; }
+  .field { position: relative; display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; background: #fff; }
+  .field:focus-within { border-color: var(--blue); }
+  .field input { border: 0; outline: 0; flex: 1; padding: 14px 0; background: transparent; min-width: 0; font-size: 16px; }
+  .field .mk { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .mk.a { background: var(--blue); }
+  .mk.b { background: var(--teal); border-radius: 3px; }
+  .field label { position: absolute; left: 34px; top: -9px; font-size: 11px; background: #fff; padding: 0 4px; color: var(--muted); }
+  .swap { position: absolute; right: 26px; margin-top: -21px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center; }
+  .sugg { position: absolute; left: 0; right: 0; top: 100%; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.15); z-index: 30; margin-top: 4px; overflow: hidden; display: none; }
+  .sugg.show { display: block; }
+  .sugg button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .sugg button:last-child { border-bottom: 0; }
+  .sugg button:hover, .sugg button:focus { background: var(--blue-soft); outline: 0; }
+  .sugg small { display: block; color: var(--muted); }
+
+  .btn { border: 0; border-radius: 14px; padding: 15px 18px; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; transition: transform .08s, opacity .2s; }
+  .btn:active { transform: scale(.98); }
+  .btn-primary { background: linear-gradient(135deg, var(--teal), #0a8a8f); color: #fff; box-shadow: 0 6px 16px rgba(14,159,126,.35); }
+  .btn-blue { background: var(--blue); color: #fff; }
+  .btn-ghost { background: var(--blue-soft); color: var(--blue); }
+  .btn-outline { background: #fff; border: 1.5px solid var(--line); color: var(--text); }
+  .btn-danger { background: var(--low); color: #fff; }
+  .btn[disabled] { opacity: .5; pointer-events: none; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { border: 1.5px solid var(--line); background: #fff; border-radius: 99px; padding: 8px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+  .chip.on { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+
+  .tip { display: flex; gap: 12px; align-items: flex-start; background: var(--teal-soft); border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+  .tip svg { flex: none; width: 22px; height: 22px; color: var(--teal); }
+
+  .quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .quick button { background: #fff; border: 0; box-shadow: var(--shadow); border-radius: 14px; padding: 14px; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+  .quick .ic { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .quick b { font-size: 14px; }
+  .quick span { font-size: 12px; color: var(--muted); }
+
+  /* Map */
+  .map-wrap { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); background: #eaf0e6; position: relative; }
+  .map-wrap svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 14px; font-size: 12px; color: var(--muted); padding: 10px 12px; background: #fff; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -2px; margin-right: 4px; }
+  .risk-pulse { animation: pulse 2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes pulse { 0% { opacity: .55; transform: scale(.6); } 100% { opacity: 0; transform: scale(1.6); } }
+  .map-badge { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,.95); border-radius: 10px; padding: 6px 10px; font-size: 12px; box-shadow: var(--shadow); }
+
+  /* Route cards */
+  .route { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; border: 2px solid transparent; cursor: pointer; transition: border-color .15s; }
+  .route.sel { border-color: var(--blue); }
+  .route-head { display: flex; align-items: center; gap: 10px; }
+  .route-color { width: 6px; align-self: stretch; border-radius: 4px; }
+  .route-name { font-weight: 700; }
+  .route-via { font-size: 13px; color: var(--muted); }
+  .route-time { margin-left: auto; text-align: right; }
+  .route-time { flex: none; }
+  .route-time b { white-space: nowrap; font-size: 22px; display: block; line-height: 1; }
+  .route-time small { color: var(--muted); font-size: 12px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 99px; padding: 5px 10px; font-size: 12px; font-weight: 600; }
+  .b-alta { background: var(--safe-bg); color: #116b33; }
+  .b-media { background: var(--mid-bg); color: #8a6500; }
+  .b-baja { background: var(--low-bg); color: #a3271c; }
+  .b-neutral { background: #eef2f7; color: var(--muted); }
+  .badge svg { width: 14px; height: 14px; }
+  .reco { font-size: 11px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .detail { margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 10px; display: none; }
+  .route.sel .detail { display: block; }
+  .seg { display: flex; gap: 10px; padding: 7px 0; font-size: 14px; align-items: flex-start; }
+  .seg .si { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; font-size: 12px; }
+  .seg.ok .si { background: var(--safe-bg); color: var(--safe); }
+  .seg.warn .si { background: var(--mid-bg); color: var(--mid); }
+  .seg.bad .si { background: var(--low-bg); color: var(--low); }
+  .seg small { display: block; color: var(--muted); font-size: 12px; }
+
+  .sticky-cta { position: sticky; bottom: 62px; margin: 14px -16px 0; padding: 12px 16px; z-index: 5; background: linear-gradient(to bottom, rgba(243,247,251,0), var(--bg) 30%); }
+  .sticky-cta .btn { font-size: 15px; padding: 14px 10px; white-space: nowrap; }
+
+  /* Reports */
+  .report { display: flex; gap: 12px; background: #fff; border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow); }
+  .report + .report { margin-top: 10px; }
+  .r-ic { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .r-ic svg { width: 20px; height: 20px; }
+  .report .t { font-weight: 600; }
+  .report .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .report .confirm { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+  .report .confirm button { border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 4px 10px; font-size: 12px; }
+  .report .confirm button.done { background: var(--teal-soft); border-color: var(--teal); color: var(--teal); }
+  .new-tag { background: var(--teal); color: #fff; font-size: 10px; border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+  .zone-summary { display: flex; gap: 8px; }
+  .zone-summary > div { flex: 1; background: #fff; border-radius: 12px; padding: 10px; text-align: center; box-shadow: var(--shadow); }
+  .zone-summary b { display: block; font-size: 20px; }
+  .zone-summary span { font-size: 11px; color: var(--muted); }
+
+  .fab { position: fixed; bottom: 86px; right: max(16px, calc(50% - 220px + 16px)); z-index: 25; border: 0; border-radius: 99px; padding: 14px 18px; background: var(--navy); color: #fff; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px rgba(11,58,110,.35); }
+
+  /* Forms */
+  .form-label { font-size: 13px; font-weight: 600; margin: 16px 0 8px; display: block; }
+  .types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .types button { border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 8px; font-size: 14px; text-align: left; }
+  .types button.on { border-color: var(--blue); background: var(--blue-soft); font-weight: 600; }
+  .types svg { width: 20px; height: 20px; flex: none; }
+  .input { width: 100%; border: 1.5px solid var(--line); border-radius: 12px; padding: 13px 12px; background: #fff; outline: 0; font-size: 16px; }
+  .input:focus { border-color: var(--blue); }
+  textarea.input { resize: vertical; min-height: 70px; }
+  .loc-btn { margin-top: 8px; border: 0; background: none; color: var(--blue); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+  .anon { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 14px; }
+
+  /* Sheet / modal */
+  .overlay { position: fixed; inset: 0; background: rgba(9, 25, 45, .45); z-index: 40; display: none; }
+  .overlay.show { display: block; }
+  .sheet { position: fixed; left: 50%; bottom: 0; transform: translate(-50%, 100%); width: 100%; max-width: 440px; background: var(--bg); border-radius: 22px 22px 0 0; z-index: 50; max-height: 92vh; overflow-y: auto; padding: 10px 16px 24px; transition: transform .25s ease; }
+  .sheet.show { transform: translate(-50%, 0); }
+  .grab { width: 40px; height: 5px; background: #c8d3df; border-radius: 9px; margin: 2px auto 10px; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; }
+  .sheet-head h2 { margin: 0; }
+  .x { border: 0; background: #e6edf5; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; }
+
+  /* Share */
+  .contact { display: flex; align-items: center; gap: 12px; background: #fff; border: 2px solid transparent; border-radius: 14px; padding: 12px; box-shadow: var(--shadow); width: 100%; text-align: left; }
+  .contact + .contact { margin-top: 8px; }
+  .contact.on { border-color: var(--teal); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; flex: none; }
+  .contact .check { margin-left: auto; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+  .contact.on .check { background: var(--teal); border-color: var(--teal); }
+  .linkbox { display: flex; align-items: center; gap: 8px; background: #fff; border: 1.5px dashed var(--blue); border-radius: 12px; padding: 10px 12px; font-family: ui-monospace, Menlo, monospace; font-size: 14px; word-break: break-all; }
+  .linkbox span { flex: 1; }
+  .linkbox button { border: 0; background: var(--blue-soft); color: var(--blue); border-radius: 8px; padding: 8px 10px; font-weight: 600; font-family: inherit; flex: none; }
+  .msg-preview { background: #e7fbe9; border-radius: 12px 12px 12px 2px; padding: 10px 12px; font-size: 14px; margin-top: 12px; }
+  .send-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .send-row .btn { font-size: 14px; padding: 12px; }
+  .wa { background: #25d366; color: #fff; }
+  .progress { height: 10px; background: #e2e9f1; border-radius: 99px; overflow: hidden; }
+  .progress > div { height: 100%; background: linear-gradient(90deg, var(--teal), var(--blue)); border-radius: 99px; transition: width .6s linear; }
+  .live-card { text-align: center; }
+  .live-ring { width: 84px; height: 84px; margin: 6px auto 10px; border-radius: 50%; background: var(--teal-soft); display: flex; align-items: center; justify-content: center; position: relative; }
+  .live-ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 3px solid var(--teal); animation: ring 1.8s ease-out infinite; }
+  @keyframes ring { from { transform: scale(.85); opacity: .9; } to { transform: scale(1.35); opacity: 0; } }
+  .live-ring svg { width: 38px; height: 38px; color: var(--teal); }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 14px 0; }
+  .stat-grid div { background: var(--bg); border-radius: 12px; padding: 10px 6px; }
+  .stat-grid b { display: block; font-size: 17px; }
+  .stat-grid span { font-size: 11px; color: var(--muted); }
+  .steps { display: flex; gap: 6px; margin-bottom: 14px; }
+  .steps div { flex: 1; height: 4px; border-radius: 4px; background: var(--line); }
+  .steps div.on { background: var(--teal); }
+
+  /* Profile */
+  .seg-ctrl { display: flex; background: #e6edf5; border-radius: 12px; padding: 4px; }
+  .seg-ctrl button { flex: 1; border: 0; background: none; border-radius: 9px; padding: 10px; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .seg-ctrl button.on { background: #fff; color: var(--blue); box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .switch-row:last-child { border-bottom: 0; }
+  .switch { width: 46px; height: 28px; border-radius: 99px; background: #cbd6e2; border: 0; position: relative; flex: none; transition: background .2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .switch.on { background: var(--teal); }
+  .switch.on::after { left: 21px; }
+  .profile-head { display: flex; align-items: center; gap: 14px; }
+  .profile-head .avatar { width: 56px; height: 56px; font-size: 22px; background: linear-gradient(135deg, var(--blue), var(--teal)); }
+
+  /* Feedback */
+  .fb-opts { display: grid; gap: 8px; margin-top: 12px; }
+  .fb-opts button { border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 13px; text-align: left; font-size: 15px; }
+  .fb-opts button.on { border-color: var(--blue); background: var(--blue-soft); font-weight: 600; }
+  .tally { display: flex; gap: 8px; margin-top: 10px; }
+  .tally div { flex: 1; text-align: center; background: var(--bg); border-radius: 10px; padding: 8px 4px; }
+  .tally b { display: block; font-size: 18px; }
+  .tally span { font-size: 11px; color: var(--muted); }
+
+  /* Bottom nav */
+  nav.tabs { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; background: #fff; border-top: 1px solid var(--line); display: flex; z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
+  nav.tabs button { flex: 1; border: 0; background: none; padding: 9px 0 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); }
+  nav.tabs button svg { width: 24px; height: 24px; }
+  nav.tabs button.on { color: var(--blue); font-weight: 700; }
+
+  .toast { position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 20px); background: var(--navy); color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px; z-index: 60; opacity: 0; pointer-events: none; transition: all .25s; max-width: calc(100% - 32px); width: max-content; text-align: center; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .loading { text-align: center; padding: 50px 0; color: var(--muted); }
+  .spinner { width: 42px; height: 42px; border-radius: 50%; border: 4px solid var(--blue-soft); border-top-color: var(--blue); margin: 0 auto 14px; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; padding: 30px 10px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <button class="back" id="backBtn" aria-label="Volver">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="brand">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 2l11 4v9c0 7-4.8 12.4-11 15-6.2-2.6-11-8-11-15V6l11-4z" fill="#fff" fill-opacity=".18" stroke="#fff" stroke-width="2"/><path d="M11 21c2-5 8-3 10-9" stroke="#5ef0b8" stroke-width="2.6" stroke-linecap="round"/><circle cx="11" cy="21" r="2" fill="#fff"/><circle cx="21" cy="12" r="2" fill="#5ef0b8"/></svg>
+        <span id="title">RutaSegura</span>
+      </div>
+      <button class="pill-live" id="livePill" data-go="share"><span class="dot"></span>Compartiendo</button>
+    </div>
+    <div class="top-sub" id="subtitle">Arequipa · muévete de noche con tranquilidad</div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section class="screen active" id="s-home">
+      <h2 id="greet">Hola 👋 ¿A dónde vas hoy?</h2>
+      <div class="card search-card">
+        <div class="field" id="f-origin">
+          <span class="mk a"></span><label>¿De dónde sales?</label>
+          <input id="origin" placeholder="Ej. UNSA – Ciudad Universitaria" autocomplete="off">
+          <div class="sugg" id="sg-origin"></div>
+        </div>
+        <button class="swap" id="swapBtn" aria-label="Intercambiar origen y destino">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 4v16M7 4L3 8M7 4l4 4M17 20V4M17 20l-4-4M17 20l4-4"/></svg>
+        </button>
+        <div class="field" id="f-dest" style="margin-top:14px">
+          <span class="mk b"></span><label>¿A dónde vas?</label>
+          <input id="dest" placeholder="Ej. Cayma, Av. Cayma" autocomplete="off">
+          <div class="sugg" id="sg-dest"></div>
+        </div>
+        <div class="chips" style="margin-top:12px" id="quickDest"></div>
+        <button class="btn btn-primary" id="searchBtn" style="margin-top:16px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          Buscar ruta segura
+        </button>
+      </div>
+
+      <div class="tip" style="margin-top:14px" id="nightTip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        <div><b>Hora punta nocturna.</b> <span class="muted">Entre 6 y 9 p.m. el tráfico en Av. Ejército y Av. Independencia suma hasta 15 min. Calculamos el tiempo real con eso.</span></div>
+      </div>
+
+      <h3>Accesos rápidos</h3>
+      <div class="quick">
+        <button data-go="reports">
+          <span class="ic" style="background:var(--low-bg);color:var(--low)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg></span>
+          <b>Reportar algo</b><span>Avisa a la comunidad</span>
+        </button>
+        <button data-go="share">
+          <span class="ic" style="background:var(--teal-soft);color:var(--teal)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
+          <b>Compartir mi viaje</b><span>Con tu contacto de confianza</span>
+        </button>
+      </div>
+
+      <h3>Cerca de ti <span class="muted small" style="font-weight:400">· últimas 24 h</span></h3>
+      <div id="homeReports"></div>
+      <button class="btn btn-ghost" data-go="reports" style="margin-top:12px">Ver todos los reportes</button>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="screen" id="s-results"></section>
+
+    <!-- REPORTS -->
+    <section class="screen" id="s-reports">
+      <h2>Reportes de la comunidad</h2>
+      <p class="muted small" style="margin-top:-6px">Zona: <b id="zoneName">Cercado y alrededores</b> · lo que otros usuarios reportaron recientemente</p>
+      <div class="zone-summary" id="zoneSummary"></div>
+      <div class="chips" style="margin:14px 0" id="reportFilters"></div>
+      <div id="reportList"></div>
+      <div style="height:60px"></div>
+    </section>
+
+    <!-- SHARE -->
+    <section class="screen" id="s-share"></section>
+
+    <!-- PROFILE -->
+    <section class="screen" id="s-profile"></section>
+  </main>
+
+  <button class="fab" id="fab" style="display:none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    Reportar algo
+  </button>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V10z"/></svg>Inicio</button>
+    <button data-tab="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Reportes</button>
+    <button data-tab="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Mi viaje</button>
+    <button data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Perfil</button>
+  </nav>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Mock data ---------- */
+  var PLACES = [
+    { n: 'UNSA – Ciudad Universitaria', d: 'Av. Venezuela, Cercado' },
+    { n: 'UCSM – Universidad Católica Santa María', d: 'Urb. San José, Yanahuara' },
+    { n: 'UTP Arequipa', d: 'Av. Tacna y Arica, Cercado' },
+    { n: 'Plaza de Armas', d: 'Cercado' },
+    { n: 'Terminal Terrestre', d: 'Av. Arturo Ibáñez, J. L. Bustamante y Rivero' },
+    { n: 'Mall Aventura Porongoche', d: 'Av. Porongoche, Paucarpata' },
+    { n: 'Real Plaza Arequipa', d: 'Av. Ejército, Cayma' },
+    { n: 'Cayma', d: 'Av. Cayma' },
+    { n: 'Yanahuara', d: 'Mirador de Yanahuara' },
+    { n: 'Cerro Colorado', d: 'Av. Aviación' },
+    { n: 'Mariano Melgar', d: 'Av. Simón Bolívar' },
+    { n: 'Miraflores', d: 'Av. Goyeneche' },
+    { n: 'Paucarpata', d: 'Av. Kennedy' },
+    { n: 'José Luis Bustamante y Rivero', d: 'Av. Dolores' },
+    { n: 'Sachaca', d: 'Av. Fernandini' },
+    { n: 'Hospital Honorio Delgado', d: 'Av. Alcides Carrión' }
+  ];
+
+  var TYPES = {
+    robo:  { label: 'Robo / asalto', color: '#dc4a3d', bg: '#fde6e3',
+      icon: '<path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/><path d="M12 8v4M12 16h.01"/>' },
+    bujiazo: { label: 'Bujiazo / arranche', color: '#e0662b', bg: '#fdebdf',
+      icon: '<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M3 12h18"/>' },
+    acoso: { label: 'Acoso', color: '#9b4dca', bg: '#f2e6fa',
+      icon: '<circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0113 0"/><path d="M19 3l2 2M21 3l-2 2"/>' },
+    luz:   { label: 'Mal alumbrado', color: '#b88600', bg: '#fef6d8',
+      icon: '<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/><path d="M4 4l16 16"/>' },
+    sola:  { label: 'Zona sola', color: '#4b6584', bg: '#e6edf5',
+      icon: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>' }
+  };
+
+  var now = Date.now();
+  var MIN = 60000;
+  var REPORTS = [
+    { id: 1, type: 'bujiazo', place: 'Semáforo Av. Ejército con Av. Trinidad Morán', ago: 25 * MIN, note: 'Arrancharon un celular por la ventana de un taxi.', confirms: 7 },
+    { id: 2, type: 'luz', place: 'Calle Jerusalén, cuadra 6', ago: 70 * MIN, note: 'Dos postes apagados, muy oscuro.', confirms: 12 },
+    { id: 3, type: 'robo', place: 'Paradero Av. Independencia (frente a UNSA)', ago: 2.5 * 60 * MIN, note: 'Robo a estudiante esperando combi.', confirms: 9 },
+    { id: 4, type: 'sola', place: 'Puente Grau, lado Cercado', ago: 4 * 60 * MIN, note: 'Después de las 10 pm casi no pasa gente.', confirms: 4 },
+    { id: 5, type: 'acoso', place: 'Av. La Marina, cerca al Puente Bolognesi', ago: 6 * 60 * MIN, note: 'Grupo molestando a chicas que pasan.', confirms: 5 },
+    { id: 6, type: 'luz', place: 'Av. Venezuela, cuadra 12', ago: 9 * 60 * MIN, note: 'Tramo sin luz junto al canal.', confirms: 3 },
+    { id: 7, type: 'bujiazo', place: 'Óvalo Av. Goyeneche', ago: 15 * 60 * MIN, note: 'Motociclista arranchó una mochila.', confirms: 6 }
+  ];
+
+  var CONTACTS = [
+    { id: 'emg', name: 'Mamá', phone: '+51 959 123 456', color: '#0e9f7e' },
+    { id: 'c2', name: 'Diego (hermano)', phone: '+51 987 654 321', color: '#1565c0' },
+    { id: 'c3', name: 'Lucía – compañera UNSA', phone: '+51 944 222 118', color: '#9b4dca' }
+  ];
+
+  /* Route templates. Coordinates live in the illustrated map's 360x260 space. */
+  var ROUTE_TEMPLATES = [
+    { id: 'safe', name: 'Ruta más segura', via: 'por Av. Ejército y Av. Cayma (avenidas principales)',
+      safety: 'alta', light: 'alta', color: '#16a34a', base: 1.25, km: 1.2, traffic: 'moderado',
+      path: [[40,222],[40,150],[132,150],[132,62],[318,62],[318,38]], risks: [],
+      segs: [
+        ['ok', 'Sal por Av. Venezuela hacia Av. Ejército', 'Bien iluminada · paraderos con vigilancia municipal'],
+        ['warn', 'Av. Ejército (hora punta)', 'Tráfico moderado · mantén ventanas cerradas en semáforos'],
+        ['ok', 'Av. Cayma hasta destino', 'Iluminada · comercios abiertos hasta tarde']
+      ] },
+    { id: 'mix', name: 'Ruta equilibrada', via: 'por Puente Grau y Calle Jerusalén',
+      safety: 'media', light: 'media', color: '#d29a00', base: 1.05, km: 1.0, traffic: 'moderado',
+      path: [[40,222],[110,222],[110,128],[220,128],[220,62],[318,62],[318,38]], risks: [[165,128,'Calle Jerusalén: 2 postes apagados (reporte hace 1 h)','luz']],
+      segs: [
+        ['ok', 'Av. Venezuela hasta Puente Grau', 'Iluminada'],
+        ['warn', 'Calle Jerusalén, cuadra 6', 'Mal alumbrado reportado hace 1 h · 12 confirmaciones'],
+        ['ok', 'Av. Cayma hasta destino', 'Iluminada · comercios abiertos']
+      ] },
+    { id: 'fast', name: 'Ruta más rápida', via: 'por Av. Independencia y Av. La Marina',
+      safety: 'baja', light: 'baja', color: '#dc4a3d', base: 0.85, km: 0.9, traffic: 'intenso',
+      path: [[40,222],[176,222],[176,180],[270,180],[270,100],[318,100],[318,38]], risks: [[176,206,'Paradero Av. Independencia: robo a estudiante (hace 2 h)','robo'],[270,140,'Semáforo Av. La Marina: bujiazo reportado (hace 25 min)','bujiazo']],
+      segs: [
+        ['bad', 'Paradero Av. Independencia', 'Robo reportado hace 2 h · evita esperar aquí'],
+        ['bad', 'Semáforo Av. La Marina', 'Bujiazo reportado hace 25 min · guarda el celular'],
+        ['warn', 'Tramo junto al río', 'Poca iluminación y zona sola después de 10 p.m.']
+      ] }
+  ];
+
+  /* ---------- State ---------- */
+  var DEFAULT_PROFILE = { name: 'Valeria', role: 'Estudiante', emgName: 'Mamá', emgPhone: '+51 959 123 456', pref: 'segura', autoShare: true, alerts: true, avoidDark: true };
+  var state = {
+    screen: 'home', history: [],
+    origin: '', dest: '', routes: [], selected: null,
+    reports: REPORTS.slice(), myConfirms: {}, filter: 'all',
+    profile: load('rs_profile', DEFAULT_PROFILE),
+    share: { step: 0, contacts: ['emg'], link: '', progress: 0, timer: null, startedAt: 0 },
+    feedback: load('rs_feedback', []),
+    report: { type: null, place: '', time: '', note: '', anon: true }
+  };
+
+  function load(key, fallback) {
+    try { var v = localStorage.getItem(key); if (v) return Object.assign(Array.isArray(fallback) ? [] : {}, Array.isArray(fallback) ? [] : fallback, JSON.parse(v)); } catch (e) {}
+    return Array.isArray(fallback) ? fallback.slice() : Object.assign({}, fallback);
+  }
+  function save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+
+  /* ---------- Helpers ---------- */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function hash(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+  function ago(ms) {
+    var m = Math.round(ms / MIN);
+    if (m < 1) return 'ahora mismo';
+    if (m < 60) return 'hace ' + m + ' min';
+    var h = Math.round(m / 60); return 'hace ' + h + ' h';
+  }
+  function hhmm(d) { return d.toTimeString().slice(0, 5); }
+  function addMin(d, m) { return new Date(d.getTime() + m * MIN); }
+  function initials(n) { return (n || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase(); }
+  function typeIcon(t, size) {
+    var T = TYPES[t];
+    return '<svg width="' + (size || 20) + '" height="' + (size || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + T.icon + '</svg>';
+  }
+  function bulb(level) {
+    var fill = level === 'alta' ? '#f5b400' : level === 'media' ? 'url(#halfBulb)' : 'none';
+    return '<svg viewBox="0 0 24 24" width="14" height="14"><defs><linearGradient id="halfBulb" x1="0" y1="1" x2="0" y2="0"><stop offset="50%" stop-color="#f5b400"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" fill="' + fill + '" stroke="currentColor" stroke-width="2"/><path d="M9 20h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  }
+  var SAFETY_LABEL = { alta: 'Seguridad alta', media: 'Seguridad media', baja: 'Seguridad baja' };
+  var LIGHT_LABEL = { alta: 'Bien iluminada', media: 'Iluminación parcial', baja: 'Poca iluminación' };
+  var shieldIc = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/></svg>';
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+
+  /* ---------- Navigation ---------- */
+  var TITLES = {
+    home: ['RutaSegura', 'Arequipa · muévete de noche con tranquilidad'],
+    results: ['Rutas sugeridas', ''],
+    reports: ['Reportes', 'Información de la comunidad'],
+    share: ['Mi viaje', 'Comparte tu ubicación en tiempo real'],
+    profile: ['Mi perfil', 'Ajustes y contacto de emergencia']
+  };
+  function go(name, opts) {
+    opts = opts || {};
+    if (name !== state.screen && !opts.noHistory) state.history.push(state.screen);
+    state.screen = name;
+    $$('.screen').forEach(function (s) { s.classList.toggle('active', s.id === 's-' + name); });
+    $$('nav.tabs button').forEach(function (b) {
+      var tab = b.dataset.tab; b.classList.toggle('on', tab === name || (name === 'results' && tab === 'home'));
+    });
+    $('#title').textContent = TITLES[name][0];
+    $('#subtitle').textContent = name === 'results' ? (state.origin + ' → ' + state.dest) : TITLES[name][1];
+    $('#backBtn').classList.toggle('show', name !== 'home');
+    $('#fab').style.display = name === 'reports' ? 'flex' : 'none';
+    if (name === 'home') renderHome();
+    if (name === 'reports') renderReports();
+    if (name === 'share') renderShare();
+    if (name === 'profile') renderProfile();
+    window.scrollTo(0, 0);
+  }
+  function back() {
+    var prev = state.history.pop() || 'home';
+    go(prev, { noHistory: true });
+  }
+
+  /* ---------- Home ---------- */
+  function setupAutocomplete(inputId, boxId) {
+    var input = $('#' + inputId), box = $('#' + boxId);
+    function show() {
+      var q = input.value.trim().toLowerCase();
+      var list = PLACES.filter(function (p) { return !q || (p.n + ' ' + p.d).toLowerCase().indexOf(q) > -1; }).slice(0, 5);
+      if (inputId === 'origin') list = [{ n: 'Mi ubicación actual', d: 'Usar GPS (simulado)', gps: true }].concat(list.slice(0, 4));
+      box.innerHTML = list.map(function (p) { return '<button type="button" data-v="' + esc(p.gps ? 'Mi ubicación (Av. Venezuela)' : p.n) + '">' + (p.gps ? '📍 ' : '') + esc(p.n) + '<small>' + esc(p.d) + '</small></button>'; }).join('');
+      box.classList.toggle('show', list.length > 0);
+    }
+    input.addEventListener('focus', show);
+    input.addEventListener('input', function () { state[inputId] = input.value; show(); });
+    input.addEventListener('blur', function () { setTimeout(function () { box.classList.remove('show'); }, 150); });
+    box.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      input.value = b.dataset.v; state[inputId] = b.dataset.v; box.classList.remove('show'); input.blur();
+    });
+  }
+
+  function renderHome() {
+    var p = state.profile;
+    $('#greet').textContent = 'Hola, ' + (p.name || 'viajero') + ' 👋 ¿A dónde vas hoy?';
+    var quick = ['Cayma', 'Terminal Terrestre', 'Mall Aventura Porongoche', 'UCSM – Universidad Católica Santa María'];
+    $('#quickDest').innerHTML = quick.map(function (q) { return '<button class="chip" data-dest="' + esc(q) + '">' + esc(q.split(' – ')[0]) + '</button>'; }).join('');
+    $('#homeReports').innerHTML = state.reports.slice(0, 3).map(reportHTML).join('');
+  }
+
+  /* ---------- Results ---------- */
+  function buildRoutes() {
+    var h = hash(state.origin + '|' + state.dest);
+    var baseMin = 18 + (h % 17); // 18–34 min free-flow
+    var hour = new Date().getHours();
+    var peak = hour >= 18 && hour <= 21;
+    var routes = ROUTE_TEMPLATES.map(function (t) {
+      var trafficExtra = t.traffic === 'intenso' ? (peak ? 14 : 6) : (peak ? 6 : 2);
+      var mins = Math.round(baseMin * t.base) + trafficExtra;
+      return Object.assign({}, t, {
+        mins: mins, freeMins: Math.round(baseMin * t.base),
+        trafficExtra: trafficExtra, km: (baseMin * 0.45 * t.km).toFixed(1),
+        eta: hhmm(addMin(new Date(), mins))
+      });
+    });
+    // Ordering follows the user's stated preference.
+    if (state.profile.pref === 'rapida') routes.sort(function (a, b) { return a.mins - b.mins; });
+    return routes;
+  }
+
+  function mapSVG(routes, selId) {
+    var streets = '';
+    [40, 110, 176, 220, 270, 318].forEach(function (x) { streets += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="260" stroke="#fff" stroke-width="7"/>'; });
+    [38, 62, 100, 128, 150, 180, 222].forEach(function (y) { streets += '<line x1="0" y1="' + y + '" x2="360" y2="' + y + '" stroke="#fff" stroke-width="7"/>'; });
+    var blocks = '';
+    for (var i = 0; i < 14; i++) {
+      var bx = (i * 53) % 340, by = (i * 37) % 240;
+      blocks += '<rect x="' + bx + '" y="' + by + '" width="18" height="14" rx="3" fill="#dfe6d8"/>';
+    }
+    var order = routes.slice().sort(function (a, b) { return (a.id === selId) - (b.id === selId); });
+    var lines = order.map(function (r) {
+      var pts = r.path.map(function (p) { return p.join(','); }).join(' ');
+      var sel = r.id === selId;
+      return '<polyline points="' + pts + '" fill="none" stroke="' + (sel ? '#fff' : 'transparent') + '" stroke-width="' + (sel ? 11 : 0) + '" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '<polyline data-route="' + r.id + '" points="' + pts + '" fill="none" stroke="' + (sel ? r.color : '#9aaabb') + '" stroke-width="' + (sel ? 6 : 4) + '" stroke-linejoin="round" stroke-linecap="round" ' + (sel ? '' : 'stroke-dasharray="2 7" opacity=".9"') + ' style="cursor:pointer"/>';
+    }).join('');
+    var lit = '<polyline points="40,150 132,150 132,62 318,62" fill="none" stroke="#ffd34d" stroke-width="16" opacity=".22" stroke-linecap="round" stroke-linejoin="round"/>';
+    var risks = '';
+    routes.forEach(function (r) {
+      r.risks.forEach(function (z) {
+        var col = z[3] === 'luz' ? '#d29a00' : '#dc4a3d';
+        var active = r.id === selId;
+        risks += '<circle cx="' + z[0] + '" cy="' + z[1] + '" r="22" fill="' + col + '" class="risk-pulse"/>' +
+          '<circle cx="' + z[0] + '" cy="' + z[1] + '" r="13" fill="' + col + '" opacity="' + (active ? .9 : .55) + '"/>' +
+          '<text x="' + z[0] + '" y="' + (z[1] + 5) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">!</text>';
+      });
+    });
+    return '<svg viewBox="0 0 360 260" role="img" aria-label="Mapa ilustrado con rutas y zonas de riesgo">' +
+      '<rect width="360" height="260" fill="#eaf0e6"/>' + blocks +
+      '<path d="M0,95 C70,80 120,115 190,100 S300,70 360,82" stroke="#b9d9f0" stroke-width="16" fill="none"/>' +
+      '<text x="300" y="76" font-size="9" fill="#5a88ad" font-style="italic">Río Chili</text>' +
+      '<circle cx="250" cy="210" r="20" fill="#cfe3c4"/><text x="250" y="213" font-size="8" text-anchor="middle" fill="#5b7a4c">Parque</text>' +
+      streets + lit + lines + risks +
+      '<g><circle cx="40" cy="222" r="11" fill="#1565c0" stroke="#fff" stroke-width="3"/><text x="40" y="226" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">A</text></g>' +
+      '<g><rect x="307" y="27" width="22" height="22" rx="6" fill="#0e9f7e" stroke="#fff" stroke-width="3"/><text x="318" y="42" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">B</text></g>' +
+      '</svg>';
+  }
+
+  function routeCard(r, idx) {
+    var sel = r.id === state.selected;
+    var reco = '';
+    if (r.id === 'safe') reco = '<div class="reco">' + shieldIc.replace('<svg', '<svg width="13" height="13"') + ' Recomendada de noche</div>';
+    else if (idx === 0 && state.profile.pref === 'rapida') reco = '<div class="reco" style="color:var(--blue)">⚡ La más rápida</div>';
+    var riskBadge = r.risks.length
+      ? '<span class="badge b-' + (r.risks.length > 1 ? 'baja' : 'media') + '">⚠ ' + r.risks.length + ' zona' + (r.risks.length > 1 ? 's' : '') + ' reportada' + (r.risks.length > 1 ? 's' : '') + '</span>'
+      : '<span class="badge b-alta">✓ Sin reportes recientes</span>';
+    return '<div class="route' + (sel ? ' sel' : '') + '" data-route="' + r.id + '" tabindex="0">' + reco +
+      '<div class="route-head"><span class="route-color" style="background:' + r.color + '"></span>' +
+      '<div><div class="route-name">' + r.name + '</div><div class="route-via">' + r.via + '</div></div>' +
+      '<div class="route-time"><b>' + r.mins + ' min</b><small>llegas ' + r.eta + '</small></div></div>' +
+      '<div class="badges">' +
+        '<span class="badge b-' + r.safety + '">' + shieldIc + SAFETY_LABEL[r.safety] + '</span>' +
+        '<span class="badge b-neutral">' + bulb(r.light) + LIGHT_LABEL[r.light] + '</span>' +
+        riskBadge +
+      '</div>' +
+      '<div class="detail">' +
+        '<div class="small muted" style="margin-bottom:6px">🚗 ' + r.km + ' km · tráfico ' + r.traffic + ' (+' + r.trafficExtra + ' min por hora punta)</div>' +
+        r.segs.map(function (s) {
+          var ic = s[0] === 'ok' ? '✓' : '!';
+          return '<div class="seg ' + s[0] + '"><span class="si">' + ic + '</span><div>' + esc(s[1]) + '<small>' + esc(s[2]) + '</small></div></div>';
+        }).join('') +
+      '</div></div>';
+  }
+
+  function renderResults() {
+    var sel = state.routes.filter(function (r) { return r.id === state.selected; })[0];
+    var el = $('#s-results');
+    el.innerHTML =
+      '<div class="map-wrap">' + mapSVG(state.routes, state.selected) +
+        '<div class="map-badge">🌙 ' + hhmm(new Date()) + ' · ' + (sel ? sel.name : '') + '</div>' +
+        '<div class="legend"><span><i style="background:#16a34a"></i>Segura</span><span><i style="background:#d29a00"></i>Media</span><span><i style="background:#dc4a3d"></i>Riesgo</span><span><i style="background:#ffd34d;opacity:.6"></i>Iluminada</span><span><i style="background:#dc4a3d;opacity:.5"></i>Zona reportada</span></div>' +
+      '</div>' +
+      (sel && sel.risks.length ? '<div class="tip" style="margin-top:12px;background:var(--low-bg)"><span style="font-size:18px">⚠️</span><div><b>En esta ruta:</b><br><span class="small">' + sel.risks.map(function (z) { return esc(z[2]); }).join('<br>') + '</span></div></div>' : '') +
+      '<h3>' + state.routes.length + ' opciones · ordenadas por ' + (state.profile.pref === 'rapida' ? 'rapidez' : 'seguridad') + '</h3>' +
+      '<div class="stack">' + state.routes.map(routeCard).join('') + '</div>' +
+      '<div class="sticky-cta row">' +
+        '<button class="btn btn-outline" data-go="reports">Reportar algo</button>' +
+        '<button class="btn btn-primary" id="startTrip">Compartir mi viaje</button>' +
+      '</div>';
+  }
+
+  function search() {
+    var o = $('#origin').value.trim(), d = $('#dest').value.trim();
+    if (!o) { $('#origin').focus(); toast('Indica desde dónde sales'); return; }
+    if (!d) { $('#dest').focus(); toast('Indica a dónde vas'); return; }
+    if (o.toLowerCase() === d.toLowerCase()) { toast('El origen y el destino son iguales'); return; }
+    state.origin = o; state.dest = d;
+    go('results');
+    $('#s-results').innerHTML = '<div class="loading"><div class="spinner"></div>Analizando iluminación, reportes y tráfico…</div>';
+    setTimeout(function () {
+      state.routes = buildRoutes();
+      state.selected = state.routes[0].id;
+      if (state.screen === 'results') renderResults();
+    }, 900);
+  }
+
+  /* ---------- Reports ---------- */
+  function reportHTML(r) {
+    var T = TYPES[r.type];
+    var confirmed = state.myConfirms[r.id];
+    return '<div class="report">' +
+      '<span class="r-ic" style="background:' + T.bg + ';color:' + T.color + '">' + typeIcon(r.type) + '</span>' +
+      '<div style="flex:1;min-width:0"><div class="t">' + T.label + (r.mine ? '<span class="new-tag">TU REPORTE</span>' : '') + '</div>' +
+      '<div class="small">' + esc(r.place) + '</div>' +
+      (r.note ? '<div class="small muted" style="margin-top:4px">“' + esc(r.note) + '”</div>' : '') +
+      '<div class="meta">' + (r.time ? 'Ocurrió ' + esc(r.time) + ' · ' : '') + 'reportado ' + ago(Date.now() - (r.at || (now - r.ago))) + '</div>' +
+      (r.mine ? '' : '<div class="confirm"><button data-confirm="' + r.id + '" class="' + (confirmed ? 'done' : '') + '">' + (confirmed ? '✓ Confirmado' : '👍 Yo también lo vi') + '</button><span>' + (r.confirms + (confirmed ? 1 : 0)) + ' confirmaciones</span></div>') +
+      '</div></div>';
+  }
+
+  function renderReports() {
+    var counts = { robo: 0, bujiazo: 0, luz: 0, other: 0 };
+    state.reports.forEach(function (r) { if (counts[r.type] != null) counts[r.type]++; else counts.other++; });
+    $('#zoneSummary').innerHTML =
+      '<div><b style="color:var(--low)">' + (counts.robo + counts.bujiazo) + '</b><span>Robos / bujiazos</span></div>' +
+      '<div><b style="color:var(--mid)">' + counts.luz + '</b><span>Mal alumbrado</span></div>' +
+      '<div><b style="color:var(--muted)">' + counts.other + '</b><span>Acoso / zona sola</span></div>';
+    var filters = [['all', 'Todos']].concat(Object.keys(TYPES).map(function (k) { return [k, TYPES[k].label]; }));
+    $('#reportFilters').innerHTML = filters.map(function (f) { return '<button class="chip' + (state.filter === f[0] ? ' on' : '') + '" data-filter="' + f[0] + '">' + f[1] + '</button>'; }).join('');
+    var list = state.reports.filter(function (r) { return state.filter === 'all' || r.type === state.filter; });
+    $('#reportList').innerHTML = list.length ? list.map(reportHTML).join('') : '<div class="empty">No hay reportes de este tipo en la zona. 🙌</div>';
+  }
+
+  function openReportForm() {
+    var d = new Date();
+    state.report = { type: null, place: '', time: hhmm(d), note: '', anon: true };
+    var r = state.report;
+    openSheet(
+      '<div class="sheet-head"><h2>Reportar algo</h2><button class="x" data-close aria-label="Cerrar">×</button></div>' +
+      '<p class="muted small">Tu reporte ayuda a otros a elegir rutas más seguras. Es rápido y puede ser anónimo.</p>' +
+      '<span class="form-label">¿Qué pasó?</span>' +
+      '<div class="types" id="rTypes">' + Object.keys(TYPES).map(function (k) {
+        return '<button type="button" data-type="' + k + '" style="color:' + TYPES[k].color + '">' + typeIcon(k) + '<span style="color:var(--text)">' + TYPES[k].label + '</span></button>';
+      }).join('') + '</div>' +
+      '<label class="form-label" for="rPlace">Ubicación aproximada</label>' +
+      '<input class="input" id="rPlace" placeholder="Ej. Paradero Av. Independencia, frente a UNSA" list="placeList">' +
+      '<datalist id="placeList">' + PLACES.map(function (p) { return '<option value="' + esc(p.n) + '">'; }).join('') + '</datalist>' +
+      '<button type="button" class="loc-btn" id="rGps">📍 Usar mi ubicación actual</button>' +
+      '<label class="form-label" for="rTime">¿A qué hora?</label>' +
+      '<div class="row"><input class="input" type="time" id="rTime" value="' + r.time + '">' +
+      '<div class="chips" style="flex:1.4;align-items:center"><button type="button" class="chip on" data-when="0">Ahora</button><button type="button" class="chip" data-when="30">Hace 30 min</button></div></div>' +
+      '<label class="form-label" for="rNote">Detalle (opcional)</label>' +
+      '<textarea class="input" id="rNote" placeholder="Ej. Poste apagado, dos personas merodeando…" maxlength="200"></textarea>' +
+      '<label class="anon"><button type="button" class="switch on" id="rAnon" aria-label="Reportar de forma anónima"></button>Reportar de forma anónima</label>' +
+      '<button class="btn btn-primary" id="rSubmit" style="margin-top:18px" disabled>Enviar reporte</button>'
+    );
+    var sheet = $('#sheet');
+    function validate() { $('#rSubmit').disabled = !(r.type && $('#rPlace').value.trim()); }
+    $('#rTypes').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      r.type = b.dataset.type; $$('#rTypes button').forEach(function (x) { x.classList.toggle('on', x === b); }); validate();
+    });
+    $('#rPlace').addEventListener('input', validate);
+    $('#rGps').addEventListener('click', function () {
+      var btn = this; btn.textContent = '📍 Obteniendo ubicación…';
+      setTimeout(function () { $('#rPlace').value = 'Av. Venezuela cdra. 10, Cercado (GPS)'; btn.textContent = '✓ Ubicación detectada'; validate(); }, 700);
+    });
+    $$('[data-when]', sheet).forEach(function (c) {
+      c.addEventListener('click', function () {
+        $$('[data-when]', sheet).forEach(function (x) { x.classList.toggle('on', x === c); });
+        $('#rTime').value = hhmm(addMin(new Date(), -Number(c.dataset.when)));
+      });
+    });
+    $('#rAnon').addEventListener('click', function () { r.anon = !r.anon; this.classList.toggle('on', r.anon); });
+    $('#rSubmit').addEventListener('click', function () {
+      var rep = { id: Date.now(), type: r.type, place: $('#rPlace').value.trim(), time: $('#rTime').value, note: $('#rNote').value.trim(), at: Date.now(), confirms: 0, mine: true };
+      state.reports.unshift(rep);
+      closeSheet();
+      state.filter = 'all';
+      if (state.screen !== 'reports') go('reports'); else renderReports();
+      toast('✅ ¡Gracias! Tu reporte ya es visible para la comunidad');
+    });
+  }
+
+  /* ---------- Share ---------- */
+  function currentRoute() {
+    return state.routes.filter(function (r) { return r.id === state.selected; })[0] || null;
+  }
+  function contactList() {
+    var p = state.profile;
+    var list = CONTACTS.slice();
+    list[0] = Object.assign({}, list[0], { name: p.emgName || 'Contacto de emergencia', phone: p.emgPhone || '' });
+    return list;
+  }
+
+  function renderShare() {
+    var s = state.share, el = $('#s-share'), route = currentRoute();
+    var contacts = contactList();
+    var steps = '<div class="steps">' + [0, 1, 2].map(function (i) { return '<div class="' + (i <= s.step ? 'on' : '') + '"></div>'; }).join('') + '</div>';
+    var tripLine = route
+      ? '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="route-color" style="background:' + route.color + ';width:6px;height:40px;border-radius:4px"></span><div style="flex:1"><b>' + esc(state.origin) + ' → ' + esc(state.dest) + '</b><div class="small muted">' + route.name + ' · ' + route.mins + ' min · llegada ' + route.eta + '</div></div></div>'
+      : '<div class="card"><b>Ubicación actual</b><div class="small muted">Aún no elegiste una ruta. Compartiremos tu ubicación en vivo hasta que lo detengas. <a href="#" data-go="home">Buscar una ruta</a></div></div>';
+
+    if (s.step === 0) {
+      el.innerHTML = steps +
+        '<h2>Compartir mi viaje</h2><p class="muted small" style="margin-top:-6px">Tu contacto verá tu ubicación en tiempo real y recibirá un aviso cuando llegues.</p>' +
+        tripLine +
+        '<h3>¿Con quién lo compartes?</h3>' +
+        contacts.map(function (c) {
+          var on = s.contacts.indexOf(c.id) > -1;
+          return '<button class="contact' + (on ? ' on' : '') + '" data-contact="' + c.id + '"><span class="avatar" style="background:' + c.color + '">' + esc(initials(c.name)) + '</span><div><b>' + esc(c.name) + '</b>' + (c.id === 'emg' ? ' <span class="badge b-alta" style="padding:2px 8px;font-size:10px">Emergencia</span>' : '') + '<div class="small muted">' + esc(c.phone) + '</div></div><span class="check">✓</span></button>';
+        }).join('') +
+        '<button class="btn btn-primary" id="genLink" style="margin-top:18px"' + (s.contacts.length ? '' : ' disabled') + '>Generar link de seguimiento</button>';
+    } else if (s.step === 1) {
+      var names = contacts.filter(function (c) { return s.contacts.indexOf(c.id) > -1; }).map(function (c) { return c.name; });
+      var msg = 'Hola, estoy en camino' + (route ? ' a ' + state.dest + '. Llego aprox. a las ' + route.eta : '') + '. Sigue mi viaje en vivo aquí: ' + s.link;
+      el.innerHTML = steps +
+        '<h2>Tu link está listo 🔗</h2><p class="muted small" style="margin-top:-6px">Válido hasta que llegues a tu destino. Solo quien tenga el link puede verlo.</p>' +
+        '<div class="linkbox"><span id="linkText">' + esc(s.link) + '</span><button id="copyLink">Copiar</button></div>' +
+        '<div class="small muted" style="margin-top:14px">Vista previa del mensaje para <b>' + esc(names.join(', ')) + '</b>:</div>' +
+        '<div class="msg-preview">' + esc(msg) + '</div>' +
+        '<div class="send-row"><button class="btn wa" data-send="WhatsApp">WhatsApp</button><button class="btn btn-ghost" data-send="SMS">SMS</button></div>' +
+        '<button class="btn btn-primary" id="startLive" style="margin-top:12px">Iniciar viaje y compartir</button>' +
+        '<button class="btn btn-outline" id="cancelShare" style="margin-top:8px">Cancelar</button>';
+    } else if (s.step === 2) {
+      var total = route ? route.mins : 25;
+      var left = Math.max(0, Math.round(total * (1 - s.progress / 100)));
+      var arrived = s.progress >= 100;
+      el.innerHTML = steps +
+        '<div class="card live-card">' +
+          (arrived
+            ? '<div class="live-ring" style="background:var(--safe-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg></div><h2>¡Llegaste! 🎉</h2><p class="muted small">Avisamos a tus contactos que llegaste bien. El link dejó de estar activo.</p>'
+            : '<div class="live-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0112 2.5a7 7 0 017 7C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><h2>Compartiendo en vivo</h2><p class="muted small">' + esc(contacts.filter(function (c) { return s.contacts.indexOf(c.id) > -1; }).map(function (c) { return c.name; }).join(', ')) + ' puede ver tu ubicación</p>') +
+          '<div class="progress"><div style="width:' + Math.min(100, s.progress) + '%"></div></div>' +
+          '<div class="stat-grid"><div><b>' + left + ' min</b><span>restantes</span></div><div><b>' + (route ? route.eta : '--:--') + '</b><span>llegada</span></div><div><b>' + (route ? route.safety.charAt(0).toUpperCase() + route.safety.slice(1) : '—') + '</b><span>seguridad</span></div></div>' +
+        '</div>' +
+        (arrived
+          ? '<button class="btn btn-primary" id="giveFb" style="margin-top:14px">Cuéntanos qué te pareció</button><button class="btn btn-outline" id="newTrip" style="margin-top:8px">Volver al inicio</button>'
+          : '<div class="row" style="margin-top:14px"><button class="btn btn-ghost" id="imOk">✓ Estoy bien</button><button class="btn btn-danger" id="sos">SOS</button></div>' +
+            '<button class="btn btn-outline" id="copyLink2" style="margin-top:8px">Copiar link otra vez</button>' +
+            '<button class="btn btn-outline" id="stopShare" style="margin-top:8px">Dejar de compartir</button>' +
+            '<p class="small muted" style="text-align:center;margin-top:10px">Prototipo: el viaje avanza en modo acelerado.</p>');
+    }
+  }
+
+  function copy(text, msg) {
+    function ok() { toast(msg || '📋 Link copiado'); }
+    try {
+      if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(ok, fallback); return; }
+    } catch (e) {}
+    fallback();
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta); ok();
+    }
+  }
+
+  function startLive() {
+    var s = state.share; s.step = 2; s.progress = 0; s.startedAt = Date.now();
+    $('#livePill').classList.add('show');
+    clearInterval(s.timer);
+    s.timer = setInterval(function () {
+      s.progress = Math.min(100, s.progress + 4);
+      if (state.screen === 'share') {
+        if (s.progress >= 100) renderShare();
+        else {
+          var bar = $('#s-share .progress > div'); if (bar) bar.style.width = s.progress + '%';
+          var route = currentRoute(); var total = route ? route.mins : 25;
+          var b = $('#s-share .stat-grid b'); if (b) b.textContent = Math.max(0, Math.round(total * (1 - s.progress / 100))) + ' min';
+        }
+      }
+      if (s.progress >= 100) {
+        clearInterval(s.timer); $('#livePill').classList.remove('show');
+        toast('🏁 Llegaste a tu destino. Tus contactos fueron notificados.');
+        if (state.screen === 'share') renderShare();
+      }
+    }, 1000);
+    renderShare();
+    toast('📡 Viaje compartido. Tus contactos ya pueden verte.');
+  }
+
+  function stopShare() {
+    var s = state.share; clearInterval(s.timer);
+    s.step = 0; s.progress = 0; s.link = '';
+    $('#livePill').classList.remove('show');
+  }
+
+  /* ---------- Profile ---------- */
+  function renderProfile() {
+    var p = state.profile;
+    var fb = state.feedback;
+    var tally = { si: 0, talvez: 0, no: 0 };
+    fb.forEach(function (f) { if (tally[f.answer] != null) tally[f.answer]++; });
+    var pct = fb.length ? Math.round(tally.si / fb.length * 100) : 0;
+    $('#s-profile').innerHTML =
+      '<div class="card profile-head"><span class="avatar">' + esc(initials(p.name)) + '</span><div><b style="font-size:17px">' + esc(p.name || 'Sin nombre') + '</b><div class="small muted">' + esc(p.role) + ' · Arequipa</div></div></div>' +
+      '<h3>Datos personales</h3><div class="card">' +
+        '<label class="form-label" for="pName" style="margin-top:0">Nombre</label><input class="input" id="pName" value="' + esc(p.name) + '" placeholder="Tu nombre">' +
+        '<span class="form-label">Me muevo de noche como</span><div class="chips" id="pRole">' + ['Estudiante', 'Trabajador/a', 'Ambos'].map(function (r) { return '<button type="button" class="chip' + (p.role === r ? ' on' : '') + '" data-role="' + r + '">' + r + '</button>'; }).join('') + '</div>' +
+      '</div>' +
+      '<h3>Contacto de emergencia</h3><div class="card">' +
+        '<label class="form-label" for="pEmgName" style="margin-top:0">Nombre</label><input class="input" id="pEmgName" value="' + esc(p.emgName) + '" placeholder="Ej. Mamá">' +
+        '<label class="form-label" for="pEmgPhone">Celular</label><input class="input" id="pEmgPhone" type="tel" inputmode="tel" value="' + esc(p.emgPhone) + '" placeholder="+51 9xx xxx xxx">' +
+      '</div>' +
+      '<h3>Preferencia de ruta</h3>' +
+      '<div class="seg-ctrl" id="pPref"><button data-pref="segura" class="' + (p.pref === 'segura' ? 'on' : '') + '">🛡️ Más segura</button><button data-pref="rapida" class="' + (p.pref === 'rapida' ? 'on' : '') + '">⚡ Más rápida</button></div>' +
+      '<p class="small muted">Define qué ruta te mostramos primero en los resultados.</p>' +
+      '<div class="card" style="padding:4px 16px">' +
+        switchRow('avoidDark', 'Evitar calles con poca iluminación') +
+        switchRow('alerts', 'Alertas de zonas de riesgo en mi ruta') +
+        switchRow('autoShare', 'Sugerir compartir viaje después de las 9 p.m.') +
+      '</div>' +
+      '<button class="btn btn-primary" id="saveProfile" style="margin-top:16px">Guardar cambios</button>' +
+      '<h3>Tu opinión</h3><div class="card"><p class="small" style="margin-top:0">¿Te gustaría usar RutaSegura en tus traslados de noche?</p>' +
+        '<button class="btn btn-ghost" id="openFb">Responder (30 seg)</button>' +
+        '<details style="margin-top:12px"><summary class="small muted">Resultados de esta sesión de testeo (facilitador)</summary>' +
+          '<div class="tally"><div><b style="color:var(--safe)">' + tally.si + '</b><span>Sí la usaría</span></div><div><b style="color:var(--mid)">' + tally.talvez + '</b><span>Tal vez</span></div><div><b style="color:var(--low)">' + tally.no + '</b><span>No</span></div></div>' +
+          '<p class="small" style="margin:10px 0 0">' + fb.length + ' respuestas · <b>' + pct + '%</b> con intención de uso (meta: 60%)</p>' +
+          (fb.length ? '<button class="btn btn-outline" id="exportFb" style="margin-top:10px;font-size:14px;padding:10px">Copiar respuestas (CSV)</button><button class="btn btn-outline" id="clearFb" style="margin-top:8px;font-size:14px;padding:10px">Borrar respuestas</button>' : '') +
+        '</details></div>';
+  }
+  function switchRow(key, label) {
+    return '<div class="switch-row"><span>' + label + '</span><button type="button" class="switch' + (state.profile[key] ? ' on' : '') + '" data-switch="' + key + '" aria-label="' + esc(label) + '"></button></div>';
+  }
+
+  /* ---------- Feedback (hypothesis test) ---------- */
+  function openFeedback() {
+    var fb = { answer: null, value: null };
+    openSheet(
+      '<div class="sheet-head"><h2>Tu opinión</h2><button class="x" data-close aria-label="Cerrar">×</button></div>' +
+      '<p class="small">Si RutaSegura estuviera disponible hoy, ¿la usarías para moverte de noche en Arequipa?</p>' +
+      '<div class="fb-opts" id="fbA"><button data-a="si">👍 Sí, la usaría</button><button data-a="talvez">🤔 Tal vez</button><button data-a="no">👎 No la usaría</button></div>' +
+      '<p class="small" style="margin-top:16px">¿Qué fue lo más útil?</p>' +
+      '<div class="chips" id="fbV">' + ['Score de seguridad', 'Tiempo con tráfico', 'Reportes de la comunidad', 'Compartir mi viaje'].map(function (v) { return '<button type="button" class="chip" data-v="' + v + '">' + v + '</button>'; }).join('') + '</div>' +
+      '<textarea class="input" id="fbNote" style="margin-top:12px" placeholder="¿Algo que agregarías o cambiarías? (opcional)"></textarea>' +
+      '<button class="btn btn-primary" id="fbSend" style="margin-top:14px" disabled>Enviar</button>'
+    );
+    $('#fbA').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      fb.answer = b.dataset.a; $$('#fbA button').forEach(function (x) { x.classList.toggle('on', x === b); }); $('#fbSend').disabled = false;
+    });
+    $('#fbV').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      fb.value = b.dataset.v; $$('#fbV button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    });
+    $('#fbSend').addEventListener('click', function () {
+      state.feedback.push({ answer: fb.answer, value: fb.value || '', note: $('#fbNote').value.trim(), at: new Date().toISOString() });
+      save('rs_feedback', state.feedback);
+      closeSheet(); toast('🙏 ¡Gracias por tu opinión!');
+      if (state.screen === 'profile') renderProfile();
+    });
+  }
+
+  /* ---------- Sheet ---------- */
+  function openSheet(html) {
+    $('#sheet').innerHTML = '<div class="grab"></div>' + html;
+    $('#overlay').classList.add('show'); $('#sheet').classList.add('show');
+    $('#sheet').scrollTop = 0;
+  }
+  function closeSheet() { $('#overlay').classList.remove('show'); $('#sheet').classList.remove('show'); }
+
+  /* ---------- Events ---------- */
+  setupAutocomplete('origin', 'sg-origin');
+  setupAutocomplete('dest', 'sg-dest');
+  $('#searchBtn').addEventListener('click', search);
+  [$('#origin'), $('#dest')].forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); }); });
+  $('#swapBtn').addEventListener('click', function () {
+    var o = $('#origin').value; $('#origin').value = $('#dest').value; $('#dest').value = o;
+  });
+  $('#backBtn').addEventListener('click', back);
+  $('#fab').addEventListener('click', openReportForm);
+  $('#overlay').addEventListener('click', closeSheet);
+  $('#tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    state.history = []; go(b.dataset.tab, { noHistory: true });
+  });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var goEl = t.closest('[data-go]');
+    if (goEl) {
+      e.preventDefault();
+      var dest = goEl.dataset.go;
+      // "Reportar algo" shortcuts open the form directly on top of the reports list.
+      if (dest === 'reports' && /Reportar/.test(goEl.textContent)) { go('reports'); openReportForm(); return; }
+      go(dest); return;
+    }
+    if (t.closest('[data-close]')) { closeSheet(); return; }
+
+    var chip = t.closest('[data-dest]');
+    if (chip) { $('#dest').value = chip.dataset.dest; state.dest = chip.dataset.dest; return; }
+
+    var routeEl = t.closest('[data-route]');
+    if (routeEl && state.screen === 'results') { state.selected = routeEl.dataset.route; renderResults(); return; }
+    if (t.closest('#startTrip')) {
+      if (state.share.step !== 2) { state.share.step = 0; }
+      go('share'); return;
+    }
+
+    var conf = t.closest('[data-confirm]');
+    if (conf) {
+      var id = conf.dataset.confirm; state.myConfirms[id] = !state.myConfirms[id];
+      if (state.screen === 'reports') renderReports(); else renderHome();
+      if (state.myConfirms[id]) toast('Gracias, confirmaste este reporte');
+      return;
+    }
+    var f = t.closest('[data-filter]');
+    if (f) { state.filter = f.dataset.filter; renderReports(); return; }
+
+    // Share flow
+    var c = t.closest('[data-contact]');
+    if (c) {
+      var arr = state.share.contacts, i = arr.indexOf(c.dataset.contact);
+      if (i > -1) arr.splice(i, 1); else arr.push(c.dataset.contact);
+      renderShare(); return;
+    }
+    if (t.closest('#genLink')) {
+      var btn = t.closest('#genLink'); btn.textContent = 'Generando link seguro…'; btn.disabled = true;
+      setTimeout(function () {
+        var code = Math.random().toString(36).slice(2, 8);
+        state.share.link = 'https://rutasegura.pe/v/' + code; state.share.step = 1; renderShare();
+      }, 700);
+      return;
+    }
+    if (t.closest('#copyLink') || t.closest('#copyLink2')) { copy(state.share.link); return; }
+    var send = t.closest('[data-send]');
+    if (send) { toast('✉️ Mensaje enviado por ' + send.dataset.send + ' (simulado)'); return; }
+    if (t.closest('#startLive')) { startLive(); return; }
+    if (t.closest('#cancelShare')) { stopShare(); renderShare(); return; }
+    if (t.closest('#stopShare')) { stopShare(); renderShare(); toast('Dejaste de compartir tu ubicación'); return; }
+    if (t.closest('#imOk')) { toast('💚 Avisamos a tus contactos que estás bien'); return; }
+    if (t.closest('#sos')) {
+      var p = state.profile;
+      openSheet('<div class="sheet-head"><h2>¿Activar SOS?</h2><button class="x" data-close aria-label="Cerrar">×</button></div>' +
+        '<p>Enviaremos tu ubicación exacta a <b>' + esc(p.emgName || 'tu contacto') + '</b> y te mostraremos los números de emergencia.</p>' +
+        '<div class="card small"><b>Serenazgo Arequipa:</b> (054) 380 050<br><b>Policía:</b> 105<br><b>Bomberos:</b> 116</div>' +
+        '<button class="btn btn-danger" id="sosConfirm" style="margin-top:14px">Sí, enviar alerta</button><button class="btn btn-outline" data-close style="margin-top:8px">Cancelar</button>');
+      return;
+    }
+    if (t.closest('#sosConfirm')) { closeSheet(); toast('🚨 Alerta enviada a ' + (state.profile.emgName || 'tu contacto') + ' (simulado)'); return; }
+    if (t.closest('#giveFb') || t.closest('#openFb')) { openFeedback(); return; }
+    if (t.closest('#newTrip')) { stopShare(); state.history = []; go('home', { noHistory: true }); return; }
+
+    // Profile
+    var role = t.closest('[data-role]');
+    if (role) { $$('#pRole .chip').forEach(function (x) { x.classList.toggle('on', x === role); }); return; }
+    var pref = t.closest('[data-pref]');
+    if (pref) { $$('#pPref button').forEach(function (x) { x.classList.toggle('on', x === pref); }); return; }
+    var sw = t.closest('[data-switch]');
+    if (sw) { sw.classList.toggle('on'); return; }
+    if (t.closest('#saveProfile')) {
+      var prof = state.profile;
+      prof.name = $('#pName').value.trim();
+      prof.emgName = $('#pEmgName').value.trim();
+      prof.emgPhone = $('#pEmgPhone').value.trim();
+      var r = $('#pRole .chip.on'); if (r) prof.role = r.dataset.role;
+      var pr = $('#pPref button.on'); if (pr) prof.pref = pr.dataset.pref;
+      $$('[data-switch]').forEach(function (x) { prof[x.dataset.switch] = x.classList.contains('on'); });
+      save('rs_profile', prof);
+      if (state.routes.length) { state.routes = buildRoutes(); }
+      renderProfile(); toast('✅ Perfil guardado');
+      return;
+    }
+    if (t.closest('#exportFb')) {
+      var rows = [['respuesta', 'lo_mas_util', 'comentario', 'fecha']].concat(state.feedback.map(function (x) { return [x.answer, x.value, x.note, x.at]; }));
+      copy(rows.map(function (r) { return r.map(function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\n'), '📋 Respuestas copiadas (CSV)');
+      return;
+    }
+    if (t.closest('#clearFb')) {
+      if (confirm('¿Borrar todas las respuestas guardadas en este dispositivo?')) { state.feedback = []; save('rs_feedback', []); renderProfile(); }
+      return;
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSheet();
+    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('route')) { state.selected = e.target.dataset.route; renderResults(); }
+  });
+
+  renderHome();
+})();
+</script>
+</body>
+</html>
